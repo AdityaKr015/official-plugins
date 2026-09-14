@@ -1,5 +1,5 @@
 --!strict
--- Type definitions for the Noctalia plugin API (plugin_api 30).
+-- Type definitions for the Noctalia plugin API (plugin_api 32).
 --
 -- luau-lsp *definition file*: it declares the host-injected globals (noctalia.*,
 -- barWidget.*, shortcut.*, launcher.*, desktopWidget.*, panel.*, ui.*) so authors
@@ -344,6 +344,7 @@ export type UiFlexProps = {
   minHeight: number?,
   onClick: UiClickHandler?,
   onHover: UiHoverHandler?,
+  tooltip: string?, -- shown on hover (API 32); wraps the container in a hover target; cleared when dropped
 }
 
 -- ui.box. Leaf node: it takes no children (use a column/row for content).
@@ -361,6 +362,7 @@ export type UiBoxProps = {
   softness: number?,
   onClick: UiClickHandler?,
   onHover: UiHoverHandler?,
+  tooltip: string?, -- shown on hover (API 32); wraps the box in a hover target; cleared when dropped
 }
 
 -- ui.label. Unset text props inherit the host defaults (in a bar, the bar's or widget's
@@ -423,6 +425,7 @@ export type UiImageProps = {
   borderWidth: number?,
   onClick: UiClickHandler?,
   onHover: UiHoverHandler?,
+  tooltip: string?, -- shown on hover (API 32); wraps the image in a hover target; cleared when dropped
 }
 
 export type UiSeparatorProps = {

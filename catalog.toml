@@ -158,15 +158,21 @@ rev = "5082ed5f85e795513b8485e4cedc66d5a2c816ff"
 [[plugin]]
 id = "noctalia/bitwarden"
 name = "Bitwarden"
-version = "1.0.1"
-updated_at = 1785242138
+version = "1.0.2"
+updated_at = 1789346848
 added_at = 1784735852
 author = "noctalia"
 license = "MIT"
 icon = "lock"
 description = "Search your Bitwarden vault from the launcher and copy passwords via the local bw serve API."
-plugin_api = 8
+plugin_api = 10
 tags = ["launcher", "privacy", "productivity", "utility"]
+
+[[plugin.release]]
+plugin_api = 8
+version = "1.0.1"
+updated_at = 1785242138
+rev = "ea6dfe3fae4d4a755dd05390548b04066250ffe9"
 
 [[plugin]]
 id = "noctalia/world_clock"

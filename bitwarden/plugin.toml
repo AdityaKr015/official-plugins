@@ -2,7 +2,7 @@
 
 id = "noctalia/bitwarden"
 name = "Bitwarden"
-version = "1.1.0"
+version = "1.2.0"
 plugin_api = 17
 author = "noctalia"
 license = "MIT"
@@ -26,6 +26,13 @@ type = "bool"
 label_key = "settings.auto_serve.label"
 description_key = "settings.auto_serve.description"
 default = true
+
+[[setting]]
+key = "hide_actions_when_searching"
+type = "bool"
+label_key = "settings.hide_actions_when_searching.label"
+description_key = "settings.hide_actions_when_searching.description"
+default = false
 
 [[setting]]
 key = "vault_timeout"

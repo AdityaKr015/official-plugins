@@ -11,15 +11,21 @@
 [[plugin]]
 id = "noctalia/example"
 name = "Example"
-version = "1.3.1"
-updated_at = 1784946285
+version = "1.3.2"
+updated_at = 1791673845
 added_at = 1781039692
 author = "noctalia"
 license = "MIT"
 icon = "puzzle"
 description = "A reference plugin demonstrating every supported entry type and common runtime APIs."
-plugin_api = 9
+plugin_api = 26
 tags = ["demo"]
+
+[[plugin.release]]
+plugin_api = 9
+version = "1.3.1"
+updated_at = 1784946285
+rev = "bfdd2e7243771e94da8d8bb0d22ac8ed4e7f61f8"
 
 [[plugin.release]]
 plugin_api = 5
@@ -94,15 +100,21 @@ rev = "48beb7c3ed4e3b0065c57097237f2525bcb89cd8"
 [[plugin]]
 id = "noctalia/wallhaven"
 name = "Wallhaven"
-version = "1.3.0"
-updated_at = 1789347325
+version = "1.3.1"
+updated_at = 1791673863
 added_at = 1782324517
 author = "noctalia"
 license = "MIT"
 icon = "photo"
 description = "Browse Wallhaven wallpapers."
-plugin_api = 9
+plugin_api = 26
 tags = ["wallpaper"]
+
+[[plugin.release]]
+plugin_api = 9
+version = "1.3.0"
+updated_at = 1789347325
+rev = "b066a06f6e95451e53f338308d0ec22c0538f992"
 
 [[plugin.release]]
 plugin_api = 3
@@ -113,15 +125,21 @@ rev = "71baaa6ce6f0bfa093257dd0bedc7f39269a0650"
 [[plugin]]
 id = "noctalia/mpvpaper"
 name = "Video Wallpaper"
-version = "1.2.0"
-updated_at = 1789386036
+version = "1.2.1"
+updated_at = 1791673839
 added_at = 1782365051
 author = "noctalia"
 license = "MIT"
 icon = "movie"
 description = "Video wallpapers via mpvpaper."
-plugin_api = 9
+plugin_api = 26
 tags = ["wallpaper", "video"]
+
+[[plugin.release]]
+plugin_api = 9
+version = "1.2.0"
+updated_at = 1789386036
+rev = "6e7111b13c0fc970dff93b4ae26387b948b362d2"
 
 [[plugin.release]]
 plugin_api = 3
@@ -145,15 +163,21 @@ tags = ["emoticon", "launcher"]
 [[plugin]]
 id = "noctalia/notes"
 name = "Notes"
-version = "1.0.5"
-updated_at = 1788199107
+version = "1.0.6"
+updated_at = 1791673842
 added_at = 1783038137
 author = "noctalia"
 license = "MIT"
 icon = "notes"
 description = "Quick text notes in a full-height side panel."
-plugin_api = 9
+plugin_api = 26
 tags = ["productivity"]
+
+[[plugin.release]]
+plugin_api = 9
+version = "1.0.5"
+updated_at = 1788199107
+rev = "634d4281e0e18a0fa1a690dacc73d3a8235f8a9e"
 
 [[plugin.release]]
 plugin_api = 3
@@ -189,21 +213,27 @@ rev = "ea6dfe3fae4d4a755dd05390548b04066250ffe9"
 [[plugin]]
 id = "noctalia/world_clock"
 name = "World Clock"
-version = "1.2.0"
-updated_at = 1791151134
+version = "1.2.1"
+updated_at = 1791673858
 added_at = 1785325491
 author = "noctalia"
 license = "MIT"
 icon = "world"
 description = "A world clock panel and bar widget for tracking multiple timezones."
-plugin_api = 19
+plugin_api = 26
 tags = ["clock", "time", "utility"]
+
+[[plugin.release]]
+plugin_api = 19
+version = "1.2.0"
+updated_at = 1791151134
+rev = "722ccff3a26b5a55be795abefde592c6d359ccef"
 
 [[plugin]]
 id = "noctalia/wallpaper_depth"
 name = "Wallpaper Depth"
-version = "1.0.5"
-updated_at = 1790985463
+version = "1.0.6"
+updated_at = 1791673855
 added_at = 1786549052
 author = "noctalia"
 license = "MIT"
@@ -221,8 +251,8 @@ rev = "4933b1c459459af3a0f9d14898b76ce0564d43b3"
 [[plugin]]
 id = "noctalia/umbriel-companion"
 name = "Umbriel Companion"
-version = "1.1.2"
-updated_at = 1790985423
+version = "1.1.3"
+updated_at = 1791673850
 added_at = 1788152189
 author = "noctalia"
 license = "MIT"

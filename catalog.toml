@@ -42,15 +42,21 @@ rev = "5082ed5f85e795513b8485e4cedc66d5a2c816ff"
 [[plugin]]
 id = "noctalia/screen_recorder"
 name = "Screen Recorder"
-version = "1.4.0"
-updated_at = 1791801466
+version = "1.4.1"
+updated_at = 1792318656
 added_at = 1781039692
 author = "noctalia"
 license = "MIT"
 icon = "video"
 description = "Record the screen with gpu-screen-recorder."
-plugin_api = 3
+plugin_api = 17
 tags = ["recording", "video"]
+
+[[plugin.release]]
+plugin_api = 3
+version = "1.4.0"
+updated_at = 1791801466
+rev = "ad6fdd9487bb3ff0d5375a940ec0c8056b588768"
 
 [[plugin]]
 id = "noctalia/bongocat"

@@ -1,8 +1,8 @@
 --!strict
--- Type definitions for the Noctalia plugin API (plugin_api 34).
+-- Type definitions for the Noctalia plugin API (plugin_api 36).
 --
 -- luau-lsp *definition file*: it declares the host-injected globals (noctalia.*,
--- barWidget.*, shortcut.*, launcher.*, desktopWidget.*, panel.*, ui.*) so authors
+-- barWidget.*, shortcut.*, launcher.*, desktopWidget.*, panel.*, layer.*, ui.*) so authors
 -- get autocomplete and typo diagnostics. Annotations are a runtime no-op.
 -- See README.md ("Editor setup") for pointing luau-lsp at this file.
 --
@@ -161,6 +161,38 @@ export type NoctaliaSound = {
   play: (name: string) -> (),
 }
 
+-- Compositor idle notification. API 35. callback(true) after `seconds` without user
+-- input, callback(false) on the next input. Honors idle inhibitors unless
+-- ignoreInhibitors is set. At most 8 watches per entry; released on reload/stop.
+export type NoctaliaIdle = {
+  watch: (seconds: number, callback: (idle: boolean) -> (), options: { ignoreInhibitors: boolean? }?) -> number,
+  unwatch: (id: number) -> boolean, -- false for an unknown id
+}
+
+export type LayerAnchor = "top" | "bottom" | "left" | "right"
+
+-- Runtime properties for noctalia.layer.configure; same value sets as the [[layer]]
+-- manifest keys. Unknown keys are a Lua error. API 36.
+export type LayerProps = {
+  layer: ("background" | "bottom" | "top" | "overlay")?,
+  anchors: { LayerAnchor }?, -- distinct values
+  width: number?, -- logical px, 0..65536; 0 = stretch when anchored to both sides, else content
+  height: number?,
+  margins: { top: number?, right: number?, bottom: number?, left: number? }?, -- missing sides = 0
+  exclusiveZone: (number | "auto")?, -- integer >= -1, or "auto"
+  keyboard: ("none" | "on_demand" | "exclusive")?,
+  clickThrough: boolean?,
+  output: string?, -- "all" | "focused" | connector name e.g. "DP-1"
+}
+
+-- Drives this plugin's own [[layer]] entries by local id ("saver"). Idempotent and
+-- applied asynchronously; configure applies to live instances and future shows. API 36.
+export type NoctaliaLayer = {
+  show: (entryId: string) -> (),
+  hide: (entryId: string) -> (),
+  configure: (entryId: string, props: LayerProps) -> (),
+}
+
 export type Noctalia = {
   log: (msg: string) -> (),
 
@@ -274,6 +306,8 @@ export type Noctalia = {
 
   state: NoctaliaState,
   sound: NoctaliaSound,
+  idle: NoctaliaIdle,
+  layer: NoctaliaLayer,
   json: NoctaliaJson,
   string: NoctaliaString,
 }
@@ -766,6 +800,14 @@ declare panel: {
   setNeedsFrameTick: (needs: boolean) -> (), -- onFrameTick(deltaMs) while open (API 18)
 }
 
+-- ── layer.* - [[layer]] declarative UI (API 36) ─────────────────────────────
+
+declare layer: {
+  render: (tree: UiNode) -> (),
+  setNeedsFrameTick: (on: boolean) -> (), -- onFrameTick(deltaMs) while the layer is shown
+  outputName: () -> string?, -- connector of the output this instance draws on
+}
+
 -- ── Entry-point callbacks ────────────────────────────────────────────────────
 --
 -- Your entry defines the globals the host calls, as plain global functions - the
@@ -780,8 +822,9 @@ declare panel: {
 --                                               -- steps is whole wheel detents (negative = up / left),
 --                                               -- startsGesture is true only on the first step of a flick
 --   function onQuery(text) / onActivate(id) end -- launcher provider
---   function onFrameTick(deltaMs) end           -- desktop widget, or open panel (API 18); after
---                                               -- setNeedsFrameTick(true), frames coalesced
+--   function onFrameTick(deltaMs) end           -- desktop widget, open panel (API 18), or shown
+--                                               -- layer (API 36); after setNeedsFrameTick(true),
+--                                               -- frames coalesced
 --   function onAudioSpectrum(valuesCsv, stateCsv) end -- audio-reactive bar widget
 --   function onOpen(context) / onClose() end    -- panel lifecycle
 --   function onKey(chord, pressed) end          -- panel: a capture_keys chord, verbatim from the

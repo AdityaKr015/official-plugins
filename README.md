@@ -40,3 +40,8 @@ To test the latest translated locales in a working checkout, run:
 
 The command asks for confirmation and overwrites the locale files returned by the translation service. It does not
 delete local locale files that are absent from the export. Review the resulting diff before committing anything.
+
+## Manifest validation
+
+Run `python .github/workflows/validate-plugins.py` to validate all plugin manifests.
+See `example/plugin.toml` for supported entry types and manifest properties.

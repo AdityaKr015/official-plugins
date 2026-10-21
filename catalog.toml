@@ -175,8 +175,8 @@ tags = ["emoticon", "launcher"]
 [[plugin]]
 id = "noctalia/notes"
 name = "Notes"
-version = "1.0.6"
-updated_at = 1791673842
+version = "1.1.0"
+updated_at = 1792622770
 added_at = 1783038137
 author = "noctalia"
 license = "MIT"

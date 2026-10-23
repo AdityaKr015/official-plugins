@@ -496,6 +496,25 @@ export type UiImageProps = {
   tooltip: string?, -- shown on hover (API 32); wraps the image in a hover target; cleared when dropped
 }
 
+-- ui.colorPicker (API 41). The shell's color picker inline; corners follow the shell's
+-- corner radius. value and callbacks are "#RRGGBB", or "#RRGGBBAA" with alpha = true. value
+-- is applied only when the prop changes between renders and never mid-drag; echoing
+-- onChange back is safe. The HEX/RGB/HSL format switch opens a dropdown only in panels.
+export type UiColorPickerProps = {
+  key: string?,
+  width: number?, -- logical px; fills the container when unset; height follows
+  flexGrow: number?,
+  opacity: number?,
+  visible: boolean?,
+  value: string?,
+  alpha: boolean?, -- transparency strip and % field
+  inputs: ("full" | "hex" | "none")?, -- default "full"
+  swatches: { string }?, -- up to 16 hex colors; clicking one keeps the current alpha
+  enabled: boolean?,
+  onChange: UiChangeHandler?, -- continuous, coalesced
+  onChangeEnd: UiChangeHandler?, -- once per drag release, applied typed value, or swatch click
+}
+
 -- ui.pixelStream (API 40). Frames from a companion process over the pixel stream socket
 -- protocol (see the declarative UI docs), aspect-fit inside width x height. Positions are
 -- "0.0000".."1.0000" over the displayed frame, 0,0 top-left. Moves are coalesced but never
@@ -790,6 +809,7 @@ declare ui: {
   glyph: (props: UiGlyphProps?) -> UiNode,
   image: (props: UiImageProps?) -> UiNode,
   pixelStream: (props: UiPixelStreamProps?) -> UiNode,
+  colorPicker: (props: UiColorPickerProps?) -> UiNode,
   separator: (props: UiSeparatorProps?) -> UiNode,
   spacer: (props: UiSpacerProps?) -> UiNode,
   progress: (props: UiProgressProps?) -> UiNode,

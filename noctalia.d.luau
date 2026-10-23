@@ -370,6 +370,11 @@ export type UiScrollHandler = string | ((offset: string, maxOffset: string) -> (
 -- Pointer position normalized to the graph's own box, "0.0000".."1.0000", 0,0 top-left.
 export type UiPointerHandler = string | ((normX: string, normY: string) -> ())
 export type UiDropHandler = string | ((payload: string, value: string) -> ())
+-- ui.pixelStream wheel steps, whole numbers as strings, positive right/down.
+export type UiStepsHandler = string | ((dx: string, dy: string) -> ())
+export type UiTextHandler = string | ((text: string) -> ())
+-- chord as in capture_keys (e.g. "Return", "Ctrl+c"); pressed is "true" (press or repeat) or "false".
+export type UiKeyEventHandler = string | ((chord: string, pressed: string) -> ())
 
 -- Common to every node. `opacity` is a group opacity: it fades children too, so use a
 -- translucent `fill` for a translucent background. `key` gives a child stable identity
@@ -489,6 +494,31 @@ export type UiImageProps = {
   onClick: UiClickHandler?,
   onHover: UiHoverHandler?,
   tooltip: string?, -- shown on hover (API 32); wraps the image in a hover target; cleared when dropped
+}
+
+-- ui.pixelStream (API 40). Frames from a companion process over the pixel stream socket
+-- protocol (see the declarative UI docs), aspect-fit inside width x height. Positions are
+-- "0.0000".."1.0000" over the displayed frame, 0,0 top-left. Moves are coalesced but never
+-- reordered across a press, release, click, or scroll. Text and key callbacks make the
+-- control focusable by clicking it.
+export type UiPixelStreamProps = {
+  key: string?,
+  width: number?,
+  height: number?,
+  flexGrow: number?,
+  opacity: number?,
+  visible: boolean?,
+  path: string?, -- companion SOCK_SEQPACKET socket; plugin-relative, ~, or absolute
+  radius: number?,
+  onPointerMove: UiPointerHandler?, -- hover over the frame; during a left drag, pinned to its edge
+  onPointerDown: UiPointerHandler?, -- left drag start on the frame
+  onPointerUp: UiPointerHandler?,
+  onPointerCancel: UiClickHandler?, -- drag ended without a release (disconnect, resize, removal, panel close)
+  onRightClick: UiPointerHandler?, -- press position
+  onMiddleClick: UiPointerHandler?,
+  onScroll: UiStepsHandler?, -- pair with the last onPointerMove position
+  onTextInput: UiTextHandler?, -- UTF-8 of text-producing keys (no Ctrl/Alt)
+  onKeyEvent: UiKeyEventHandler?, -- every other key; Super chords are never delivered
 }
 
 export type UiSeparatorProps = {
@@ -759,6 +789,7 @@ declare ui: {
   markdown: (props: UiMarkdownProps?) -> UiNode,
   glyph: (props: UiGlyphProps?) -> UiNode,
   image: (props: UiImageProps?) -> UiNode,
+  pixelStream: (props: UiPixelStreamProps?) -> UiNode,
   separator: (props: UiSeparatorProps?) -> UiNode,
   spacer: (props: UiSpacerProps?) -> UiNode,
   progress: (props: UiProgressProps?) -> UiNode,

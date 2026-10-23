@@ -1,9 +1,11 @@
 {
   "error": {
-    "stream_failed": "Could not start `umbriel subscribe workspaces`."
+    "stream_closed": "Umbriel connection closed; retrying.",
+    "stream_failed": "Could not start the Umbriel event stream; retrying."
   },
   "layout": {
     "dwindle": "Dwindle",
+    "floating": "Floating",
     "master": "Master",
     "scrolling": "Scrolling",
     "unknown": "Unknown"
@@ -46,7 +48,7 @@
       }
     },
     "scroll_cycles_layout": {
-      "description": "Scroll over the widget to cycle scrolling, dwindle, and master on the focused workspace.",
+      "description": "Scroll over the widget to cycle scrolling, dwindle, master, and floating on the focused workspace.",
       "label": "Scroll cycles the layout"
     },
     "show_layout_name": {

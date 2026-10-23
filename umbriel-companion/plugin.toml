@@ -13,7 +13,7 @@
 
 id = "noctalia/umbriel-companion"
 name = "Umbriel Companion"
-version = "1.1.3"
+version = "1.2.0"
 plugin_api = 28
 author = "noctalia"
 license = "MIT"
@@ -22,8 +22,8 @@ tags = ["umbriel", "bar", "panel", "utility"]
 icon = "layout-columns"
 description = "Show Umbriel layout or submap state and drive workspace and window actions from the bar."
 
-# No plugin-level settings: the service is driven by the event stream, so there is
-# no interval to tune.
+# No plugin-level settings: state is event-driven; the retry interval only
+# applies while disconnected.
 
 [[widget]]
 id = "bar"

@@ -11,16 +11,19 @@ local LAYOUTS = {
   { id = "scrolling", glyph = "columns-3", key = "layout.scrolling" },
   { id = "dwindle", glyph = "binary-tree", key = "layout.dwindle" },
   { id = "master", glyph = "layout-sidebar", key = "layout.master" },
+  { id = "floating", glyph = "app-window", key = "layout.floating" },
 }
 local LAYOUT_GLYPHS = {
   scrolling = "columns-3",
   dwindle = "binary-tree",
   master = "layout-sidebar",
+  floating = "app-window",
 }
 local LAYOUT_KEYS = {
   scrolling = "layout.scrolling",
   dwindle = "layout.dwindle",
   master = "layout.master",
+  floating = "layout.floating",
 }
 local WIDTH_PRESETS = { "0.333", "0.5", "0.667", "1.0" }
 local WIDTH_LABELS = { "⅓", "½", "⅔", "1" }
@@ -97,7 +100,10 @@ local function layoutPicker(focused)
       end,
     }))
   end
-  return ui.row({ gap = 6 }, buttons)
+  return ui.column({ gap = 6 }, {
+    ui.row({ gap = 6 }, { buttons[1], buttons[2] }),
+    ui.row({ gap = 6 }, { buttons[3], buttons[4] }),
+  })
 end
 
 -- Master count and column centering exist in exactly one layout each; Umbriel
@@ -157,7 +163,7 @@ local function windowIdentity(window)
   })
 end
 
-local function windowSection(window)
+local function windowSection(window, layout)
   local widths = {}
   for index, fraction in ipairs(WIDTH_PRESETS) do
     table.insert(widths, ui.button({
@@ -177,6 +183,8 @@ local function windowSection(window)
       glyph = entry.glyph,
       tooltip = tr(entry.key),
       selected = window ~= nil and window[entry.state] == true,
+      -- A floating workspace cannot tile individual windows.
+      enabled = entry.action ~= "window-toggle-floating" or layout ~= "floating",
       flexGrow = 1,
       onClick = function()
         request(entry.action)
@@ -274,7 +282,7 @@ local function render()
   end
 
   table.insert(children, ui.separator({}))
-  table.insert(children, windowSection(snapshot.focused_window))
+  table.insert(children, windowSection(snapshot.focused_window, focused ~= nil and focused.layout or nil))
   table.insert(children, ui.separator({}))
   table.insert(children, sectionTitle("panel.workspaces"))
   table.insert(children, ui.scroll({ flexGrow = 1, gap = 4 }, workspaceRows()))
@@ -308,8 +316,7 @@ end
 function onOpen(_context)
   closeButton = noctalia.getSetting("shell.show_close_buttons") ~= false
   snapshot = noctalia.state.get("umbriel.state") or snapshot
-  -- The snapshot is whatever the stream last pushed. An empty request asks the
-  -- service to confirm the stream is still alive before the user acts on it.
+  -- Opening the panel also retries a disconnected stream immediately.
   noctalia.state.set("umbriel.request", {})
   render()
 end

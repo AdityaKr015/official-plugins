@@ -1,20 +1,22 @@
 --!nonstrict
 -- Umbriel Companion bar widget - the focused layout or active submap, at a glance.
 --
--- Click opens the panel; a scroll flick cycles scrolling → dwindle → master.
+-- Click opens the panel; a scroll flick cycles scrolling → dwindle → master → floating.
 -- Every compositor call goes through the service, so several bars on several
--- outputs still share one poller.
+-- outputs still share one event stream.
 
-local LAYOUT_ORDER = { "scrolling", "dwindle", "master" }
+local LAYOUT_ORDER = { "scrolling", "dwindle", "master", "floating" }
 local LAYOUT_GLYPHS = {
   scrolling = "columns-3",
   dwindle = "binary-tree",
   master = "layout-sidebar",
+  floating = "app-window",
 }
 local LAYOUT_KEYS = {
   scrolling = "layout.scrolling",
   dwindle = "layout.dwindle",
   master = "layout.master",
+  floating = "layout.floating",
 }
 
 local snapshot = { available = false, workspaces = {}, submap_ready = false }

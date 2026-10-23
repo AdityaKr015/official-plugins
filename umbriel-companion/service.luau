@@ -4,25 +4,41 @@
 -- Umbriel pushes its workspace list, window list, and active submap over the IPC
 -- event stream. `umbriel subscribe workspaces,windows,submap` is that stream on
 -- stdout, one JSON object per line, so the service holds it open and republishes
--- each line as a snapshot the UI entries read. No timer, no polling: the bar
--- changes in the same breath as the keybind that changed a value.
+-- each line as a snapshot the UI entries read. A retry tick connects when the
+-- socket becomes ready; a connected session only reads the event stream.
 --
 --   noctalia.runStream(cmd, onLine)   long-lived child, one callback per line
 --   noctalia.state.set("umbriel.state", snapshot)     one snapshot, one re-render
 --   noctalia.state.watch("umbriel.request", handler)  actions from bar and panel
 
 local COMMAND_TIMEOUT_MS = 2000
+local RECONNECT_INTERVAL_MS = 1000
+-- runStream has no exit callback. Report termination on stdout so the next
+-- retry can reconnect, including when the child starts but cannot connect.
+local STREAM_COMMAND = [[umbriel subscribe workspaces,windows,submap; printf '\n{"event":"umbriel-companion-disconnected"}\n']]
 
--- Both halves matter: the socket variable proves this is an Umbriel session, the
--- binary is what the service actually runs.
-local available = noctalia.getenv("UMBRIEL_SOCKET") ~= nil and noctalia.commandExists("umbriel")
-
+local available = false
 local streaming = false
 local workspaces = {}
 local windows = {}
 local submap = ""
 local submapReady = false
 local streamError = nil
+
+-- A shell started by systemd can inherit WAYLAND_DISPLAY without UMBRIEL_SOCKET.
+-- Follow the CLI's fallback, scoped to this display rather than another session.
+local function socketPath()
+  local explicit = noctalia.getenv("UMBRIEL_SOCKET")
+  if explicit ~= nil and explicit ~= "" then
+    return explicit
+  end
+  local runtimeDir = noctalia.getenv("XDG_RUNTIME_DIR")
+  local display = noctalia.getenv("WAYLAND_DISPLAY")
+  if runtimeDir ~= nil and runtimeDir ~= "" and display ~= nil and display ~= "" then
+    return `{runtimeDir}/umbriel-{display}.sock`
+  end
+  return nil
+end
 
 -- A window's `focused` flag is per workspace. `active` would name the one window
 -- holding keyboard focus, but the open panel takes that, so the target is the
@@ -61,6 +77,17 @@ local function onLine(line)
   if type(decoded) ~= "table" then
     return
   end
+  if decoded.event == "umbriel-companion-disconnected" then
+    streaming = false
+    available = false
+    workspaces = {}
+    windows = {}
+    submap = ""
+    submapReady = false
+    streamError = noctalia.tr("error.stream_closed")
+    publish()
+    return
+  end
   -- The stream reports its own rejection on the first line and then closes;
   -- every other line is one subscribed state snapshot.
   if type(decoded.err) == "string" then
@@ -70,47 +97,31 @@ local function onLine(line)
   end
   if decoded.event == "workspaces" and type(decoded.data) == "table" then
     workspaces = decoded.data
-    streamError = nil
-    publish()
   elseif decoded.event == "windows" and type(decoded.data) == "table" then
     windows = decoded.data
-    streamError = nil
-    publish()
   elseif decoded.event == "submap" and (decoded.data == nil or type(decoded.data) == "string") then
     submap = decoded.data or ""
     submapReady = true
-    streamError = nil
-    publish()
+  else
+    return
   end
+  available = true
+  streamError = nil
+  publish()
 end
 
 local function startStream()
-  if not available or streaming then
+  if streaming then
     return
   end
-  streaming = noctalia.runStream("umbriel subscribe workspaces,windows,submap", onLine)
+  local path = socketPath()
+  if path == nil or not noctalia.fileExists(path) or not noctalia.commandExists("umbriel") then
+    return
+  end
+  streaming = noctalia.runStream(STREAM_COMMAND, onLine)
   if not streaming then
     streamError = noctalia.tr("error.stream_failed")
     publish()
-  end
-end
-
--- runStream never reports its child exiting, and an idle stream is silent, so
--- silence cannot be told from death. Rather than poll for it, re-check when a UI
--- entry asks: if no subscriber survives, arm a new stream.
-local function verifyStream()
-  if not available then
-    return
-  end
-  local started = noctalia.processMatches(function(matched)
-    if not matched then
-      streaming = false
-      startStream()
-    end
-  end, "umbriel", "subscribe")
-  if not started then
-    streaming = false
-    startStream()
   end
 end
 
@@ -126,15 +137,19 @@ local function runAction(action)
 end
 
 noctalia.state.watch("umbriel.request", function(value)
-  if not available or type(value) ~= "table" then
+  if type(value) ~= "table" then
     return
   end
-  if type(value.action) == "string" and value.action ~= "" then
+  startStream()
+  if available and type(value.action) == "string" and value.action ~= "" then
     runAction(value.action)
-  else
-    verifyStream()
   end
 end)
 
+function update()
+  startStream()
+end
+
+noctalia.setUpdateInterval(RECONNECT_INTERVAL_MS)
 publish()
 startStream()

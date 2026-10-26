@@ -11,15 +11,21 @@
 [[plugin]]
 id = "noctalia/example"
 name = "Example"
-version = "1.4.0"
-updated_at = 1792537367
+version = "1.4.1"
+updated_at = 1792983685
 added_at = 1781039692
 author = "noctalia"
 license = "MIT"
 icon = "puzzle"
 description = "A reference plugin demonstrating every supported entry type and common runtime APIs."
-plugin_api = 36
+plugin_api = 43
 tags = ["demo"]
+
+[[plugin.release]]
+plugin_api = 36
+version = "1.4.0"
+updated_at = 1792537367
+rev = "27abc83cdb31dc468e4d8751f5c192d7cd17d654"
 
 [[plugin.release]]
 plugin_api = 26
@@ -93,15 +99,21 @@ tags = ["language", "launcher"]
 [[plugin]]
 id = "noctalia/timer"
 name = "Timer"
-version = "1.5.0"
-updated_at = 1791484831
+version = "1.5.1"
+updated_at = 1792983685
 added_at = 1781407877
 author = "noctalia"
 license = "MIT"
 icon = "clock"
 description = "A countdown timer with bar widget, panel, and desktop widget."
-plugin_api = 20
+plugin_api = 43
 tags = ["countdown", "utility"]
+
+[[plugin.release]]
+plugin_api = 20
+version = "1.5.0"
+updated_at = 1791484831
+rev = "73d4aea7bd3f18d30f5f74ed5dc874eab1c664d6"
 
 [[plugin.release]]
 plugin_api = 3
@@ -112,15 +124,21 @@ rev = "48beb7c3ed4e3b0065c57097237f2525bcb89cd8"
 [[plugin]]
 id = "noctalia/wallhaven"
 name = "Wallhaven"
-version = "1.3.1"
-updated_at = 1791673863
+version = "1.3.2"
+updated_at = 1792983685
 added_at = 1782324517
 author = "noctalia"
 license = "MIT"
 icon = "photo"
 description = "Browse Wallhaven wallpapers."
-plugin_api = 26
+plugin_api = 43
 tags = ["wallpaper"]
+
+[[plugin.release]]
+plugin_api = 26
+version = "1.3.1"
+updated_at = 1791673863
+rev = "f4aafbda29540bd1abebddd07fb5192704afa2a5"
 
 [[plugin.release]]
 plugin_api = 9
@@ -137,15 +155,21 @@ rev = "71baaa6ce6f0bfa093257dd0bedc7f39269a0650"
 [[plugin]]
 id = "noctalia/mpvpaper"
 name = "Video Wallpaper"
-version = "1.2.1"
-updated_at = 1791673839
+version = "1.2.2"
+updated_at = 1792983685
 added_at = 1782365051
 author = "noctalia"
 license = "MIT"
 icon = "movie"
 description = "Video wallpapers via mpvpaper."
-plugin_api = 26
+plugin_api = 43
 tags = ["wallpaper", "video"]
+
+[[plugin.release]]
+plugin_api = 26
+version = "1.2.1"
+updated_at = 1791673839
+rev = "8c6b90fa92519bd2da1dd8b5f2cc940cce08367f"
 
 [[plugin.release]]
 plugin_api = 9
@@ -225,15 +249,21 @@ rev = "ea6dfe3fae4d4a755dd05390548b04066250ffe9"
 [[plugin]]
 id = "noctalia/world_clock"
 name = "World Clock"
-version = "1.2.1"
-updated_at = 1791673858
+version = "1.2.2"
+updated_at = 1792983685
 added_at = 1785325491
 author = "noctalia"
 license = "MIT"
 icon = "world"
 description = "A world clock panel and bar widget for tracking multiple timezones."
-plugin_api = 26
+plugin_api = 43
 tags = ["clock", "time", "utility"]
+
+[[plugin.release]]
+plugin_api = 26
+version = "1.2.1"
+updated_at = 1791673858
+rev = "34e5117b5ef644e834c73d2b3db8e2124e2f7e13"
 
 [[plugin.release]]
 plugin_api = 19
@@ -244,15 +274,21 @@ rev = "722ccff3a26b5a55be795abefde592c6d359ccef"
 [[plugin]]
 id = "noctalia/wallpaper_depth"
 name = "Wallpaper Depth"
-version = "1.0.6"
-updated_at = 1791673855
+version = "1.0.7"
+updated_at = 1792983685
 added_at = 1786549052
 author = "noctalia"
 license = "MIT"
 icon = "layers-subtract"
 description = "Generate depth masks that place desktop widgets behind wallpaper foregrounds."
-plugin_api = 26
+plugin_api = 43
 tags = ["wallpaper", "desktop", "ai"]
+
+[[plugin.release]]
+plugin_api = 26
+version = "1.0.6"
+updated_at = 1791673855
+rev = "add59770f573822fde514494541d8a8000f04a1f"
 
 [[plugin.release]]
 plugin_api = 25
@@ -263,12 +299,18 @@ rev = "4933b1c459459af3a0f9d14898b76ce0564d43b3"
 [[plugin]]
 id = "noctalia/umbriel-companion"
 name = "Umbriel Companion"
-version = "1.2.0"
-updated_at = 1792749089
+version = "1.2.1"
+updated_at = 1792983685
 added_at = 1788152189
 author = "noctalia"
 license = "MIT"
 icon = "layout-columns"
 description = "Show Umbriel layout or submap state and drive workspace and window actions from the bar."
-plugin_api = 28
+plugin_api = 43
 tags = ["umbriel", "bar", "panel", "utility"]
+
+[[plugin.release]]
+plugin_api = 28
+version = "1.2.0"
+updated_at = 1792749089
+rev = "4f0442067408fb5ef0cbf6eda5a5c6dddbc40ed7"

@@ -81,7 +81,7 @@ local function render()
       section("Color picker", ui.column({ gap = 8 }, {
         ui.row({ gap = 12, align = "center" }, {
           ui.button({ text = "Choose color", onClick = "onColorPickerClicked" }),
-          ui.box({ width = 32, height = 32, radius = 8, fill = selectedColor, border = "outline", borderWidth = 1 }),
+          ui.box({ width = 32, height = 32, radius = 8, fill = selectedColor, border = "outline_variant", borderWidth = 1 }),
           ui.label({ text = selectedColor, color = "on_surface", flexGrow = 1 }),
         }),
         ui.label({ text = colorPickerStatus, color = "on_surface_variant" }),

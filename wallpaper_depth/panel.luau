@@ -42,7 +42,7 @@ local function outputRows()
       align = "center",
       padding = 10,
       radius = 8,
-      fill = "surface_variant/0.35",
+      fill = "surface_container/0.35",
     }, {
       ui.glyph({ name = glyph, size = 18, color = color }),
       ui.column({ gap = 2, flexGrow = 1 }, {
@@ -138,7 +138,7 @@ local function setupCard()
     }))
   end
 
-  return ui.column({ gap = 8, padding = 10, radius = 8, fill = "surface_variant/0.35" }, children)
+  return ui.column({ gap = 8, padding = 10, radius = 8, fill = "surface_container/0.35" }, children)
 end
 
 local function render()

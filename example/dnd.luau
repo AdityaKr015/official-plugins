@@ -89,7 +89,7 @@ local function taskRow(item)
     gap = 8,
     align = "center",
     padding = 6,
-    fill = "surface_variant/0.4",
+    fill = "surface_container/0.4",
     radius = 10,
   }, {
     ui.dragSource({
@@ -140,7 +140,7 @@ local function columnCard(column)
     gap = 4,
     padding = 8,
     radius = 12,
-    fill = "surface_variant/0.15",
+    fill = "surface_container/0.15",
     flexGrow = 1,
   }, children)
 end
@@ -171,7 +171,7 @@ function render()
       onDrop = "onTaskDropped",
       padding = 8,
       radius = 10,
-      border = "outline/0.5",
+      border = "outline_variant/0.5",
     }, {
       ui.label({ text = "Rejects tasks (different dragType) - never highlights", fontSize = 12, color = "on_surface_variant" }),
     }),

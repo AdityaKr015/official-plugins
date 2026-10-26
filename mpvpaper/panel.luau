@@ -323,7 +323,7 @@ local function videoTile(video)
       path = thumb,
       fit = "cover",
       radius = TILE_RADIUS,
-      border = selected and "primary" or "outline",
+      border = selected and "primary" or "outline_variant",
       borderWidth = selected and 3 or 1,
       onClick = onClick,
     })
@@ -331,9 +331,9 @@ local function videoTile(video)
     preview = ui.box({
       width = frameWidth,
       height = frameHeight,
-      fill = "surface_variant",
+      fill = "surface_container",
       radius = TILE_RADIUS,
-      border = selected and "primary" or "outline",
+      border = selected and "primary" or "outline_variant",
       borderWidth = selected and 3 or 1,
       onClick = onClick,
     })

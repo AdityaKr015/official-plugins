@@ -166,7 +166,7 @@ local function render()
           align = "center",
           paddingV = 3,
           paddingH = 6,
-          fill = "surface_variant/0.35",
+          fill = "surface_container/0.35",
           radius = 6,
           opacity = row.on_bar ~= false and 1 or 0.55,
         }, {

@@ -214,6 +214,29 @@ ATX_HEADING_RE = re.compile(r"^ {0,3}(#{1,6})[ \t]+(.+?)[ \t]*#*[ \t]*$")
 OBSOLETE_CONFIG_ACCESSOR_RE = re.compile(
     r"\b(barWidget|desktopWidget|panel|launcher)\s*\.\s*getConfig\b"
 )
+# Plugin color roles, mirroring ColorRole in noctalia-shell src/ui/palette.h. API 43 added
+# the container roles and retired surface_variant / outline (aliased with a warning until 5.5.0).
+COLOR_ROLES_API = 43
+COLOR_ROLES_ADDED = {
+    "primary_container",
+    "on_primary_container",
+    "secondary_container",
+    "on_secondary_container",
+    "tertiary_container",
+    "on_tertiary_container",
+    "error_container",
+    "on_error_container",
+    "surface_container_low",
+    "surface_container",
+    "surface_container_high",
+    "surface_container_highest",
+    "outline_variant",
+    "scrim",
+}
+RETIRED_COLOR_ROLES = {"surface_variant": "surface_container", "outline": "outline_variant"}
+# "outline" is also a ui.button variant, so it only counts as a color role when the
+# literal sits in the value of a UiColor prop.
+COLOR_PROP_VALUE_RE = re.compile(r"\b(?:fill|border|color2?|track)\s*=(?!=)[^,;=(){}\[\]]*$")
 
 
 def is_non_empty_string(value: Any) -> bool:
@@ -315,9 +338,14 @@ def section_body(markdown: str, headings: list[tuple[int, str, int, int]], index
     return markdown[body_start:body_end].strip()
 
 
-def obsolete_config_accessors(source: str) -> list[tuple[str, int]]:
-    """Find removed entry-specific getConfig aliases outside Luau comments and strings."""
+def scan_luau(source: str) -> tuple[str, list[tuple[int, str]]]:
+    """Mask Luau comments and strings; return the masked code and each quoted literal.
+
+    Literals are (offset, contents) for '...' and "..." strings; long [[...]] strings are
+    masked but not returned.
+    """
     visible = list(source)
+    literals: list[tuple[int, str]] = []
     length = len(source)
     index = 0
 
@@ -351,24 +379,50 @@ def obsolete_config_accessors(source: str) -> list[tuple[str, int]]:
         if source[index] in "\"'":
             quote = source[index]
             end = index + 1
+            closed = False
             while end < length:
                 if source[end] == "\\" and end + 1 < length:
                     end += 2
                     continue
                 end += 1
                 if source[end - 1] == quote:
+                    closed = True
                     break
+            literals.append((index, source[index + 1 : end - 1 if closed else end]))
             mask(index, end)
             index = end
             continue
 
         index += 1
 
-    code = "".join(visible)
+    return "".join(visible), literals
+
+
+def obsolete_config_accessors(source: str) -> list[tuple[str, int]]:
+    """Find removed entry-specific getConfig aliases outside Luau comments and strings."""
+    code, _ = scan_luau(source)
     return [
         (f"{match.group(1)}.getConfig", code.count("\n", 0, match.start()) + 1)
         for match in OBSOLETE_CONFIG_ACCESSOR_RE.finditer(code)
     ]
+
+
+def color_role_problems(source: str, plugin_api: Any) -> list[str]:
+    """Retired color roles, and API 43 roles used by a plugin declaring an older API."""
+    code, literals = scan_luau(source)
+    problems = []
+    for offset, contents in literals:
+        role = contents.split("/", 1)[0]
+        line = source.count("\n", 0, offset) + 1
+        if role in RETIRED_COLOR_ROLES:
+            if role == "outline" and not COLOR_PROP_VALUE_RE.search(code, code.rfind("\n", 0, offset) + 1, offset):
+                continue
+            problems.append(
+                f"color role '{role}' on line {line} was retired; use '{RETIRED_COLOR_ROLES[role]}'"
+            )
+        elif role in COLOR_ROLES_ADDED and is_int(plugin_api) and plugin_api < COLOR_ROLES_API:
+            problems.append(f"color role '{role}' on line {line} requires plugin_api >= {COLOR_ROLES_API}")
+    return problems
 
 
 def webp_dimensions(header: bytes) -> tuple[int, int] | None:
@@ -1411,7 +1465,7 @@ class Validator:
             elif not section_body(contents, headings, settings_index):
                 self.add_error(readme, "'## Settings' section must not be empty")
 
-    def validate_luau_api(self, plugin_dir: Path) -> None:
+    def validate_luau_api(self, plugin_dir: Path, plugin_api: Any) -> None:
         for source_path in sorted(plugin_dir.rglob("*.luau")):
             try:
                 source = source_path.read_text(encoding="utf-8")
@@ -1424,6 +1478,8 @@ class Validator:
                     source_path,
                     f"'{accessor}' on line {line} was removed; use noctalia.getConfig",
                 )
+            for problem in color_role_problems(source, plugin_api):
+                self.add_error(source_path, problem)
 
     def validate_no_symlinks(self, manifest_path: Path, plugin_dir: Path) -> None:
         for path in plugin_dir.rglob("*"):
@@ -1443,7 +1499,7 @@ class Validator:
         self.validate_required_files(manifest_path, plugin_dir)
         self.validate_thumbnail(manifest_path, plugin_dir)
         self.validate_readme(plugin_dir, manifest)
-        self.validate_luau_api(plugin_dir)
+        self.validate_luau_api(plugin_dir, manifest.get("plugin_api"))
         self.validate_no_symlinks(manifest_path, plugin_dir)
 
         if "setting" in manifest:

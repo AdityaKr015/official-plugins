@@ -125,6 +125,68 @@ class PluginConfigAccessorTests(unittest.TestCase):
         self.assertEqual(validate_plugins.obsolete_config_accessors(source), [])
 
 
+class ColorRoleTests(unittest.TestCase):
+    def problems(self, source: str, plugin_api: object = 43) -> list[str]:
+        return validate_plugins.color_role_problems(source, plugin_api)
+
+    def test_rejects_retired_roles_in_color_props(self) -> None:
+        source = "\n".join(
+            [
+                'ui.row({ fill = "surface_variant" })',
+                'ui.row({ fill = excluded and "surface_variant/0.5" or "surface" })',
+                'ui.row({ border = "outline", borderWidth = 1 })',
+                "ui.label({ color = if dim then 'outline' else 'on_surface' })",
+            ]
+        )
+        self.assertEqual(
+            self.problems(source),
+            [
+                "color role 'surface_variant' on line 1 was retired; use 'surface_container'",
+                "color role 'surface_variant' on line 2 was retired; use 'surface_container'",
+                "color role 'outline' on line 3 was retired; use 'outline_variant'",
+                "color role 'outline' on line 4 was retired; use 'outline_variant'",
+            ],
+        )
+
+    def test_rejects_surface_variant_outside_color_props(self) -> None:
+        self.assertEqual(
+            self.problems('local bg = "surface_variant"'),
+            ["color role 'surface_variant' on line 1 was retired; use 'surface_container'"],
+        )
+
+    def test_accepts_outline_button_variant(self) -> None:
+        source = "\n".join(
+            [
+                'ui.button({ variant = "outline", fill = "primary" })',
+                'ui.button({ fill = "primary", variant = active and "primary" or "outline" })',
+                'ui.button({ variant = pick(fill == x, "outline") })',
+            ]
+        )
+        self.assertEqual(self.problems(source), [])
+
+    def test_accepts_current_roles_and_ignores_comments(self) -> None:
+        source = "\n".join(
+            [
+                'ui.label({ color = "on_surface_variant" })',
+                '-- fill = "surface_variant"',
+                '--[[ border = "outline" ]]',
+                'local doc = [[fill = "surface_variant"]]',
+            ]
+        )
+        self.assertEqual(self.problems(source), [])
+
+    def test_container_roles_require_api_43(self) -> None:
+        source = 'ui.row({ fill = "surface_container", border = "outline_variant/0.4" })'
+        self.assertEqual(self.problems(source, 43), [])
+        self.assertEqual(
+            self.problems(source, 42),
+            [
+                "color role 'surface_container' on line 1 requires plugin_api >= 43",
+                "color role 'outline_variant' on line 1 requires plugin_api >= 43",
+            ],
+        )
+
+
 class TranslationKeyTests(unittest.TestCase):
     def test_accepts_valid_keys(self) -> None:
         for key in (

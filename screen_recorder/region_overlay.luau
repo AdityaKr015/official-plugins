@@ -1,24 +1,16 @@
 --!nonstrict
--- Region indicator overlay ([[layer]] entry)
---
--- Lazy full-screen surface: one script copy per output, created by the service's
--- noctalia.layer.show("overlay"), destroyed on hide. While a region capture is
--- live the service publishes the picked region as
---
---   "regionIndicator" -> { geometry = "WxH+X+Y" }   (global layout coordinates)
---
--- Each copy dims everything OUTSIDE the region on its own output. The hole stays
--- fully transparent, and a thin accent ring frames it from outside, so
--- nothing inside the recorded area changes on screen: gpu-screen-recorder crops
--- to the region, so the recording is pixel-clean even when the compositor
--- captures this overlay. click_through keeps the pointer working underneath.
+-- Region indicator [[layer]]: one copy per output, shown while a region capture runs.
+-- The service publishes "regionIndicator" -> { geometry = "WxH+X+Y" } (global layout
+-- coords). Dims everything outside the region; the hole is transparent and the ring
+-- frames it from outside, so the recording stays pixel-clean. click_through keeps
+-- the pointer working.
 
 local DIM = "#00000066"      -- translucent black (~40%)
 local RING = "primary"       -- accent ring framing the region, like the annotation tool
 local BORDER_THICKNESS = 2   -- in logical px
 
--- Global "WxH+X+Y" -> region clipped to this output, in local logical px.
--- Returns hx, hy, hw, hh, outputWidth, outputHeight, or nil when off-output.
+-- "WxH+X+Y" (global layout px) -> region clipped to this output in ui px
+-- (divided by accessibility.ui_scale). nil when off-output.
 local function localRegion(geometry)
   if geometry == nil then return nil end
 
@@ -27,7 +19,6 @@ local function localRegion(geometry)
 
   local w, h, x, y = geometry:match("^(%d+)x(%d+)%+(-?%d+)%+(-?%d+)$")
   if w == nil then return nil end
-  w, h, x, y = tonumber(w), tonumber(h), tonumber(x), tonumber(y)
 
   for _, output in ipairs(noctalia.outputs()) do
     if output.name == outputName then
@@ -37,11 +28,30 @@ local function localRegion(geometry)
       local bottom = math.min(y + h - output.y, output.height)
       local hw = right - hx
       local hh = bottom - hy
+      -- Host scales ui.* dims by accessibility.ui_scale (default 1, floor 0.01).
+      local s = math.max(tonumber(noctalia.getSetting("accessibility.ui_scale")) or 1, 0.01)
       if hw <= 0 or hh <= 0 then return nil end
-      return hx, hy, hw, hh, output.width, output.height
+      -- Snap the hole outward to whole ui px: fractional band heights get rounded
+      --per-band by the layout, and the drift pushed the dim 1px into the recording.
+      local x0, y0 = math.floor(hx / s), math.floor(hy / s)
+      return x0, y0, math.ceil((hx + hw) / s) - x0, math.ceil((hy + hh) / s) - y0,
+        math.floor(output.width / s), math.floor(output.height / s)
     end
   end
   return nil
+end
+
+-- The host mirrors ui.row children under RTL; resolve the shell language the same
+-- way it does and pre-mirror the hole to keep it at the physical position.
+local RTL_LANGS = " ar ckb dv fa he ps sd ug ur yi "
+local RTL = false
+for _, tag in ipairs({ noctalia.getSetting("shell.lang") or "", noctalia.getenv("LC_ALL") or "",
+    noctalia.getenv("LC_MESSAGES") or "", noctalia.getenv("LANG") or "" }) do
+  local sub = tag ~= "" and tag:lower():match("^([^%-%._]+)")
+  if sub and RTL_LANGS:find(" " .. sub .. " ", 1, true) then
+    RTL = true
+    break
+  end
 end
 
 local function render()
@@ -54,12 +64,12 @@ local function render()
     return
   end
 
-  -- Ring thickness clamps at output edges, zero-size bands paint nothing and
-  -- the bands always sum to the output size
+  if RTL then hx = outputWidth - hx - hw end
+
   local top = math.min(BORDER_THICKNESS, hy)
-  local bottom = math.min(BORDER_THICKNESS, outputHeight - hy - hh)
+  local bottom = math.max(0, math.min(BORDER_THICKNESS, outputHeight - hy - hh))
   local left = math.min(BORDER_THICKNESS, hx)
-  local right = math.min(BORDER_THICKNESS, outputWidth - hx - hw)
+  local right = math.max(0, math.min(BORDER_THICKNESS, outputWidth - hx - hw))
 
   -- the ring's horizontal side
   local function ringRow(height)
@@ -81,7 +91,7 @@ local function render()
       ui.box({ flexGrow = 1, fill = DIM }),
     }),
     ringRow(bottom),
-    ui.box({ height = outputHeight - hy - hh - bottom, fill = DIM }),
+    ui.box({ flexGrow = 1, fill = DIM }),
   }))
 end
 

@@ -803,6 +803,11 @@ function onExit()
     end
 end
 
+-- Re-evaluate the region overlay when settings change mid-capture.
+function onConfigChanged()
+    updateRegionOverlay()
+end
+
 -- The widget and shortcut drive the recorder by publishing to this channel.
 noctalia.state.watch("command", function(cmd)
     local action = if type(cmd) == "table" and cmd.action ~= nil then cmd.action else cmd
